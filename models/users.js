@@ -4,9 +4,22 @@ const mongoose = require("mongoose")
 const UserScheme = new mongoose.Schema(
     {
         email:{
-            type:String
+            type:String,
+            unique:true
         },
         password:{
+            type:String,
+            minlength: 8
+        },
+        intentos:{
+            type: Number,
+            default: 3
+        },
+        estadoValidacion:{
+            type:["Validado","noValidado"],
+            default:"noValidado"
+        },
+        codigoValidacion:{
             type:String
         }
     },
