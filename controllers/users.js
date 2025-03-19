@@ -1,4 +1,5 @@
 const UserModel = require("../models/users");
+const { handleHttpError } = require("../utils/handleError");
 
 
 const createItem = async(req, res) =>{
@@ -8,8 +9,8 @@ const createItem = async(req, res) =>{
         console.log("Recurso creado: "+result);
         res.status(201).send(result);
     }catch(err){
-        console.err("ERROR: No se ha podido crear el usuario: "+ err);
-        res.status(404).send();
+        
+        handleHttpError(res,"ERROR: No se ha podido crear el usuario: "+ err, 404);
     }
 
 }
