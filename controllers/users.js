@@ -1,8 +1,10 @@
 const { matchedData } = require("express-validator");
 const UserModel = require("../models/users");
 const { handleHttpError } = require("../utils/handleError");
+const {JWTSign} =require("../utils/handleJWT");
 const {cifrar} = require("../utils/handlePassword");
 const {comprobarVerificadoEmail} = require("../utils/handleVerificador");
+
 
 const createItem = async(req, res) =>{
     const descripcion_error = "ERROR: No se ha podido crear el usuario: ";
@@ -28,9 +30,21 @@ const createItem = async(req, res) =>{
 
         body.codigoValidacion = codigoAleatorio;
 
+
         const result =await UserModel.create(body);
         console.log("Recurso creado: "+result);
-        res.status(201).send(result);
+
+        // Generamos un token para pasarselo a nuestro usuario.
+        const token=await JWTSign(result);
+
+        res.status(201).json(
+            {
+                email: result.email,
+                Verificado: result.estadoValidacion,
+                role: result.role,
+                token
+            }
+        );
     }catch(err){
         handleHttpError(res,descripcion_error + err, codigo_error);
     }
