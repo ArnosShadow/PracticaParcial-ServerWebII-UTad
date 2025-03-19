@@ -7,6 +7,9 @@ const createItem = async(req, res) =>{
 
     try{
         const body = matchedData(req);
+        if((typeof body.password) != String){
+            body.password=(body.password).toString();
+        }
 
         //ciframos la contraseña
         body.password=await cifrar(body.password);
