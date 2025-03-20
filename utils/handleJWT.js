@@ -13,5 +13,11 @@ const JWTSign=(user)=>{
     })
     return sign;
 }
-
-module.exports = {JWTSign} 
+const verifyToken = (tokenJwt)=>{
+    try{
+        return jwt.verify(tokenJwt, JWT_SECRET);
+    }catch(err){
+        console.log(err);
+    }
+}
+module.exports = {JWTSign, verifyToken} 
