@@ -30,7 +30,7 @@ const createItem = async(req, res) =>{
 
         body.codigoValidacion = codigoAleatorio;
 
-
+        console.log(codigoAleatorio);
         const result =await UserModel.create(body);
         console.log("Recurso creado: "+result);
 
@@ -50,44 +50,50 @@ const createItem = async(req, res) =>{
     }
 
 }
+/*
 
-const validateItem = async (req, res) =>{
-    const descripcion_error = "Error en el servidor ";
-    const codigo_error = 500
-    try{
-        //Extraemos el token.
-        email = req.body.email;
-        tokenRecibido = (req.headers.Authorization).split(" ")[1];
-        code = req.body.code;
-        if(verifyToken(tokenRecibido)){
-            //Extraemos el email.
-            usuario=UserModel.findOne({email: email});
-            if((code.toString()).length != 6){
-                descripcion_error="'El código debe ser de 6 dígitos numéricos";
-                codigo_error=400;
-                throw err;
-            }
-            if(code != usuario.codigoValidacion){
-                descripcion_error="Código de validación incorrecto";
-                codigo_error=400;
-                throw err;
-            }
+*/const validateItem = async (req, res) => {
+    let descripcion_error = "Error en el servidor: ";
+    let codigo_error = 500;
 
-            usuario.estadoValidacion = "Validado";
-            await usuario.save();
+    try {
+        const email = req.body.email;
+        const code = req.body.code;
 
-            res.status(200).json({ message: 'Usuario validado exitosamente' });
-        }else{
-            descripcion_error="Token inválido";
-            codigo_error=401;
-            throw err;
+        if (!email || !code) {
+            descripcion_error = "Faltan datos obligatorios";
+            codigo_error = 400;
+            throw new Error("Datos incompletos");
         }
-    }catch(err){
-        handleHttpError(res,descripcion_error + err, codigo_error);
+
+        if ((code.toString()).length !== 6) {
+            descripcion_error = "El código debe ser de 6 dígitos numéricos";
+            codigo_error = 400;
+            throw new Error("Código mal formado");
+        }
+
+        const usuario = await UserModel.findOne({ email });
+
+        if (!usuario) {
+            descripcion_error = "Usuario no encontrado";
+            codigo_error = 404;
+            throw new Error("No existe el usuario");
+        }
+
+        if (code !== usuario.codigoValidacion) {
+            descripcion_error = "Código de validación incorrecto";
+            codigo_error = 400;
+            throw new Error("Código inválido");
+        }
+
+        usuario.estadoValidacion = "Validado";
+        await usuario.save();
+
+        res.status(200).json({ message: 'Usuario valido' });
+
+    } catch (err) {
+        handleHttpError(res, descripcion_error + err.message, codigo_error);
     }
-
-
-    
-}
+};
 
 module.exports = {createItem,validateItem};

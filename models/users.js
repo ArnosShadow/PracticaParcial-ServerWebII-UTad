@@ -14,6 +14,10 @@ const UserScheme = new mongoose.Schema(
             type: Number,
             default: 3
         },
+        role:{
+            type:["user","admin"],
+            default:"user"
+        },
         estadoValidacion:{
             type:["Validado","noValidado"],
             default:"noValidado"
