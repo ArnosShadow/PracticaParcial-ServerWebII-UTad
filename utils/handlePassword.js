@@ -7,4 +7,9 @@ const cifrar =async  (password) =>{
 
 }
 
-module.exports = {cifrar};
+const descrifrarComparar = async (password, hashedPassword) =>{
+    const result = await bcryptjs.compare(password, hashedPassword);
+    return result;
+}
+
+module.exports = {cifrar, descrifrarComparar};

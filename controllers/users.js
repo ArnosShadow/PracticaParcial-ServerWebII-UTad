@@ -1,14 +1,14 @@
 const { matchedData } = require("express-validator");
 const UserModel = require("../models/users");
 const { handleHttpError } = require("../utils/handleError");
-const {JWTSign , verifyToken} =require("../utils/handleJWT");
-const {cifrar} = require("../utils/handlePassword");
+const {JWTSign } =require("../utils/handleJWT");
+const {cifrar, descrifrarComparar} = require("../utils/handlePassword");
 const {comprobarVerificadoEmail} = require("../utils/handleVerificador");
 
 
 const createItem = async(req, res) =>{
-    const descripcion_error = "ERROR: No se ha podido crear el usuario: ";
-    const codigo_error = 400
+    let descripcion_error = "ERROR: No se ha podido crear el usuario: ";
+    let codigo_error = 400
     try{
         const body = matchedData(req);
         if((typeof body.password) != String){
@@ -50,26 +50,25 @@ const createItem = async(req, res) =>{
     }
 
 }
-/*
 
-*/const validateItem = async (req, res) => {
+const validateItem = async (req, res) => {
     let descripcion_error = "Error en el servidor: ";
     let codigo_error = 500;
 
     try {
-        const email = req.body.email;
+        const email = req.body.email;   
         const code = req.body.code;
 
         if (!email || !code) {
             descripcion_error = "Faltan datos obligatorios";
             codigo_error = 400;
-            throw new Error("Datos incompletos");
+            throw err;
         }
 
         if ((code.toString()).length !== 6) {
             descripcion_error = "El código debe ser de 6 dígitos numéricos";
             codigo_error = 400;
-            throw new Error("Código mal formado");
+            throw err;
         }
 
         const usuario = await UserModel.findOne({ email });
@@ -77,13 +76,13 @@ const createItem = async(req, res) =>{
         if (!usuario) {
             descripcion_error = "Usuario no encontrado";
             codigo_error = 404;
-            throw new Error("No existe el usuario");
+            throw err;
         }
 
         if (code !== usuario.codigoValidacion) {
             descripcion_error = "Código de validación incorrecto";
             codigo_error = 400;
-            throw new Error("Código inválido");
+            throw err;
         }
 
         usuario.estadoValidacion = "Validado";
@@ -96,4 +95,40 @@ const createItem = async(req, res) =>{
     }
 };
 
-module.exports = {createItem,validateItem};
+const loginItem =async (req, res) =>{
+    let descripcion_error = "Error en el login: ";
+    let codigo_error = 400;
+
+    console.log("asdf");
+    try {
+        console.log("asdf");
+        const email= req.body.email;
+        let password = req.body.password;
+        if((typeof password) != String){
+            password=(password).toString();
+        }
+        const result =  await UserModel.findOne({email:email});
+        console.log(result)
+        if(!descrifrarComparar(password, result.password)){
+
+            descripcion_error = "Contraseña o email incorrecto";
+            codigo_error = 400;
+            throw err;
+        }
+
+        const token=await JWTSign(result);
+
+        res.status(200).json({
+            id: result._id,
+            email: result.email,
+            Verificado: result.estadoValidacion,
+            role: result.role,
+            token
+        });
+    } catch (err) {
+        handleHttpError(res,descripcion_error + err,codigo_error);
+    }
+};
+
+
+module.exports = {createItem,validateItem,loginItem};
