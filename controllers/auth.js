@@ -1,5 +1,5 @@
 const { matchedData } = require("express-validator");
-const AuthModel = require("../models/auth");
+const AuthModel = require("../models/users");
 const { handleHttpError } = require("../utils/handleError");
 const {JWTSign } =require("../utils/handleJWT");
 const {cifrar, descrifrarComparar} = require("../utils/handlePassword");
@@ -84,9 +84,7 @@ const validateItem = async (req, res) => {
             codigo_error = 400;
             throw err;
         }
-
-        usuario.estadoValidacion = "Validado";
-        await usuario.save();
+        await AuthModel.findOneAndReplace({ email }, {estadoValidacion: "Validado"});
 
         res.status(200).json({ message: 'Usuario valido' });
 
@@ -99,16 +97,17 @@ const loginItem =async (req, res) =>{
     let descripcion_error = "Error en el login: ";
     let codigo_error = 400;
 
-    console.log("asdf");
     try {
-        console.log("asdf");
         const email= req.body.email;
         let password = req.body.password;
+
         if((typeof password) != String){
             password=(password).toString();
         }
+
         const result =  await AuthModel.findOne({email:email});
         console.log(result)
+
         if(!descrifrarComparar(password, result.password)){
 
             descripcion_error = "Contraseña o email incorrecto";
