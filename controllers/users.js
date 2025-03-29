@@ -1,8 +1,10 @@
 
 const CompanyModel = require("../models/company");
 const UserModel = require("../models/users");
-
+const {cifrar} = require("../utils/handlePassword");
+const {JWTSign } =require("../utils/handleJWT");
 const {handleHttpError}= require("../utils/handleError");
+const company = require("../models/company");
 
 const actualizarItem=async (req, res) =>{
   let descripcion_error = "Error al actualizar los datos personales";
@@ -129,6 +131,61 @@ const recuperarCuenta = async (req, res) => {
     handleHttpError(res, descripcion_error, codigo_error);
   }
 }
+const invitar = async (req, res) => {
+  let descripcion_error="ERROR_INVITAR_USUARIO";
+  let codigo_error =500;
+  try {
+    const email = req.body.email;
 
-module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato, recuperarCuenta };
+    const usuarioExiste = await UserModel.findOne({ email });
+    if (usuarioExiste){
+      descripcion_error="Este usuario ya existe";
+      codigo_error=409;
+      throw err;
+
+    }
+    const CompañiaExiste = await CompanyModel.findOne(req.body.company);
+    if (!CompañiaExiste){
+      descripcion_error="La compañía indicada no existe";
+      codigo_error=404;
+      throw err;
+    }
+    const companyId = CompañiaExiste._id;
+
+    //ciframos la contraseña
+    if((typeof req.body.password) != String){
+      password=(req.body.password).toString();
+    }
+    password=await cifrar(password);
+
+
+    // Se generará un código aleatorio de seis dígitos.
+    const codigoAleatorio = Math.floor(100000 + Math.random() * 900000);
+    
+    const nuevoUsuario = await UserModel.create({
+      email:email,
+      password: password,
+      role: ["guest"],
+      codigoValidacion: codigoAleatorio,
+      companyId: companyId,
+      estadoValidacion: "noValidado",
+    });
+    // Generamos un token para pasarselo a nuestro usuario.
+    const token=await JWTSign(nuevoUsuario);
+
+    res.status(201).json(
+      {
+          email: nuevoUsuario.email,
+          Verificado: nuevoUsuario.estadoValidacion,
+          role: nuevoUsuario.role,
+          company: nuevoUsuario.companyId,
+          token
+      }
+  );
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+
+module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato, recuperarCuenta,invitar };
 

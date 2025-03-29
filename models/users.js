@@ -15,7 +15,7 @@ const UserScheme = new mongoose.Schema(
             default: 3
         },
         role:{
-            type:["user","admin"],
+            type:["user","admin","guest"],
             default:"user"
         },
         estadoValidacion:{
