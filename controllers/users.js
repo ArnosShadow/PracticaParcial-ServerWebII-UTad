@@ -88,6 +88,7 @@ const obtenerDato =  async (req, res) => {
     if(user == null){
       descripcion_error="Usuario no encontrado"
       codigo_error=404
+      throw err;
     }
     res.status(200).json(user);
   } catch (err) {
@@ -111,5 +112,23 @@ const eliminarDato = async (req, res) => {
     handleHttpError(res, "ERROR_DELETE_USER", 500);
   }
 }
-module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato };
+const recuperarCuenta = async (req, res) => {
+  let descripcion_error = "ERROR_RECOVER_ACCOUNT"
+  let codigo_error = 500
+  try {
+    const user = await UserModel.findOneAndUpdate({email: req.params.email},{ deleted: false });
+
+    if (!user){
+      codigo_error=404
+      descripcion_error="Usuario no encontrado"
+      throw err;
+    }
+
+    res.status(200).json({ user });
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+
+module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato, recuperarCuenta };
 
