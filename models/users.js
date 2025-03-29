@@ -33,8 +33,15 @@ const UserScheme = new mongoose.Schema(
         },
         apellido:{
             type:String
+        },
+        companyId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'company'
+        },
+        mediaId: {
+            type: mongoose.Types.ObjectId, // Estructura (string) especial de mongo
+            ref: 'storages'
         }
-        //TODO añadir la compañia por _id.
     },
     {
         timestamps: true, // createdAt, updatedAt

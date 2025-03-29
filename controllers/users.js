@@ -9,23 +9,20 @@ const actualizarItem=async (req, res) =>{
   let codigo_error = 500;
   try{
     const email = req.body.email;
-    if(result){
-        const user=UserModel.findOneAndReplace({email: email}, {
-            nombre: data.nombre,
-            apellido: data.apellido,
-            nif: data.nif
-        });
-
-        res.status(200).json({
-            _id: user._id,
-            email: user.email,
-            nombre: data.nombre,
-            apellido: data.apellido,
-            nif: data.nif,
-            estadoValidacion: user.estadoValidacion,
-            role: user.role
-        });
-    }
+    const user=await UserModel.findOneAndUpdate({email}, {
+      nombre: req.body.nombre,
+      apellido: req.body.apellido,
+      nif: req.body.nif
+    });
+    res.status(200).json({
+        _id: user._id,
+        email: user.email,
+        nombre: req.body.nombre,
+        apellido: req.body.apellido,
+        nif: req.body.nif,
+        estadoValidacion: user.estadoValidacion,
+        role: user.role
+    });
   }catch(err){
     handleHttpError(res, descripcion_error, codigo_error);
   }
@@ -61,7 +58,11 @@ const incluirItem= async (req,res) =>{
       role: user.role,
       company: {
         _id: nuevaCompania._id,
-        ...companyData
+        nombre: nuevaCompania.nombre,
+        cif: nuevaCompania.cif,
+        direccion: nuevaCompania.direccion,
+        provincia: nuevaCompania.provincia,
+        pais: nuevaCompania.pais
       }
     });
   } catch (err) {
