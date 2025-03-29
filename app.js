@@ -5,6 +5,7 @@ require("dotenv").config();
 const router = require("./routes");
 
 
+
 dbConnect();
 const app = express();
 
@@ -14,7 +15,6 @@ app.use(express.json());
 app.use("/routes", router);
 
 const port = process.env.PORT || 3001
-
 app.listen(port, ()=>{
 
     console.log("Servidor escuchando por el puerto "+ port);
