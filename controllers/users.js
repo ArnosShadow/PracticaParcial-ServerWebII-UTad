@@ -69,5 +69,31 @@ const incluirItem= async (req,res) =>{
     handleHttpError(res, descripcion_error, codigo_error);  
   }
 };
-module.exports = { actualizarItem,incluirItem };
+
+const obtenerDatos =  async (req, res) => {
+  let descripcion_error = "ERROR_GET_USER";
+  let codigo_error = 500
+  try {
+    const user = await UserModel.find();
+    res.status(200).json(user);
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+const obtenerDato =  async (req, res) => {
+  let descripcion_error = "ERROR_GET_USER";
+  let codigo_error = 500
+  try {
+    const user = await UserModel.findOne({email: req.params.email});
+    if(user == null){
+      descripcion_error="Usuario no encontrado"
+      codigo_error=404
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+
+module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato };
 
