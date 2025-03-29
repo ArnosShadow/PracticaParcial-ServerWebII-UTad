@@ -74,7 +74,7 @@ const obtenerDatos =  async (req, res) => {
   let descripcion_error = "ERROR_GET_USER";
   let codigo_error = 500
   try {
-    const user = await UserModel.find();
+    const user = await UserModel.find({deleted: false});
     res.status(200).json(user);
   } catch (err) {
     handleHttpError(res, descripcion_error, codigo_error);
@@ -84,7 +84,7 @@ const obtenerDato =  async (req, res) => {
   let descripcion_error = "ERROR_GET_USER";
   let codigo_error = 500
   try {
-    const user = await UserModel.findOne({email: req.params.email});
+    const user = await UserModel.findOne({email: req.params.email, deleted: false});
     if(user == null){
       descripcion_error="Usuario no encontrado"
       codigo_error=404
@@ -95,5 +95,21 @@ const obtenerDato =  async (req, res) => {
   }
 }
 
-module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato };
+const eliminarDato = async (req, res) => {
+  try {
+    let mensaje;
+    if (req.query.soft !== "false") {
+      const user = await UserModel.findOneAndUpdate({email:req.params.email}, { deleted: true });
+      mensaje= "Usuario desactivado (soft delete): " + user;
+    } else {
+      await UserModel.findOneAndUpdate(req.params.email);
+      mensaje ="Usuario eliminado permanentemente";
+    }
+    res.status(200).json({ message: mensaje });
+    
+  } catch (err) {
+    handleHttpError(res, "ERROR_DELETE_USER", 500);
+  }
+}
+module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato };
 

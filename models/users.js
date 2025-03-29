@@ -41,6 +41,10 @@ const UserScheme = new mongoose.Schema(
         mediaId: {
             type: mongoose.Types.ObjectId, // Estructura (string) especial de mongo
             ref: 'storages'
+        },
+        deleted: {
+            type: Boolean,
+            default: false
         }
     },
     {
