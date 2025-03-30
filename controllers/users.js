@@ -1,7 +1,7 @@
 
 const CompanyModel = require("../models/company");
 const UserModel = require("../models/users");
-const {cifrar} = require("../utils/handlePassword");
+const {cifrar, descrifrarComparar} = require("../utils/handlePassword");
 const {JWTSign } =require("../utils/handleJWT");
 const {handleHttpError}= require("../utils/handleError");
 const company = require("../models/company");
@@ -187,5 +187,52 @@ const invitar = async (req, res) => {
   }
 }
 
-module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato, recuperarCuenta,invitar };
+
+
+//SOLICITAR CONTRASEÑA
+const enviarPeticion= async (req, res) => {
+  let descripcion_error="ERROR_RECOVERY_REQUEST";
+  let codigo_error =500;
+  try {
+    const  email  = req.params.email;
+    
+    const codigo = Math.random().toString(36).substring(2, 10);
+    const user = await UserModel.findOneAndUpdate({ email }, {codigoValidacion: codigo});
+    if (!user){
+      codigo_error=404;
+      descripcion_error="Usuario no encontrado";
+      throw err;
+
+    } 
+    console.log(`Codigo para ${email}: ${codigo}`);
+
+    res.status(200).json( `Codigo para ${email}: ${codigo}` );
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+
+// ENTREGAR RECUPERACION
+const confirmarPeticion = async (req, res) => {
+  let descripcion_error="ERROR_CONFIRMAR_RECUPERACION";
+  let codigo_error =500;
+  try {
+    const { email, codigo } = req.body;
+
+    const user = await UserModel.findOneAndUpdate({ email, codigoValidacion: codigo }, {codigoValidacion:undefined});
+    if (!user){
+      codigo_error=400;
+      descripcion_error="Código inválido o usuario no encontrado";
+      throw err;
+
+    } 
+    
+
+    res.status(200).json( `La contraseña para ${email}: ${ user.password}` );
+  } catch (err) {
+    handleHttpError(res, descripcion_error, codigo_error);
+  }
+}
+
+module.exports = { actualizarItem,incluirItem, obtenerDatos, obtenerDato, eliminarDato,eliminarDato, recuperarCuenta,invitar, enviarPeticion, confirmarPeticion };
 
