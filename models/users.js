@@ -4,10 +4,13 @@ const mongoose = require("mongoose")
 const UserScheme = new mongoose.Schema(
     {
         email:{
-            type:String
+            type:String,
+            required: true,
+            unique: true
         },
         password:{
             type:String,
+            required: true,
             minlength: 8
         },
         intentos:{
@@ -23,6 +26,9 @@ const UserScheme = new mongoose.Schema(
             default:"noValidado"
         },
         codigoValidacion:{
+            type:String
+        },
+        codigoVerficacion:{
             type:String
         },
         nombre:{

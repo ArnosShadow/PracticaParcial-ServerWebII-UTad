@@ -197,7 +197,7 @@ const enviarPeticion= async (req, res) => {
     const  email  = req.params.email;
     
     const codigo = Math.random().toString(36).substring(2, 10);
-    const user = await UserModel.findOneAndUpdate({ email }, {codigoValidacion: codigo});
+    const user = await UserModel.findOneAndUpdate({ email }, {codigoVerficacion: codigo});
     if (!user){
       codigo_error=404;
       descripcion_error="Usuario no encontrado";
@@ -217,9 +217,12 @@ const confirmarPeticion = async (req, res) => {
   let descripcion_error="ERROR_CONFIRMAR_RECUPERACION";
   let codigo_error =500;
   try {
-    const { email, codigo } = req.body;
+    let { email, codigo, nuevaContraseña } = req.body;
 
-    const user = await UserModel.findOneAndUpdate({ email, codigoValidacion: codigo }, {codigoValidacion:undefined});
+    //ciframos la contraseña
+    nuevaContraseña=await cifrar(nuevaContraseña);
+
+    const user = await UserModel.findOneAndUpdate({ email, codigoVerficacion: codigo }, {codigoVerficacion:undefined, password: nuevaContraseña});
     if (!user){
       codigo_error=400;
       descripcion_error="Código inválido o usuario no encontrado";
