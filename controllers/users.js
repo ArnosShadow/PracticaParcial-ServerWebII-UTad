@@ -197,16 +197,17 @@ const enviarPeticion= async (req, res) => {
     const  email  = req.params.email;
     
     const codigo = Math.random().toString(36).substring(2, 10);
-    const user = await UserModel.findOneAndUpdate({ email }, {codigoVerficacion: codigo});
+    const user = await UserModel.findOneAndUpdate({ email }, {codigoVerificacion: codigo.toString()}, { new: true });
+
     if (!user){
       codigo_error=404;
       descripcion_error="Usuario no encontrado";
       throw err;
 
     } 
-    console.log(`Codigo para ${email}: ${codigo}`);
+    console.log(`Codigo para ${email}: ${user.codigoVerificacion}`);
 
-    res.status(200).json( `Codigo para ${email}: ${codigo}` );
+    res.status(200).json( `Codigo para ${email}: ${user.codigoVerificacion}` );
   } catch (err) {
     handleHttpError(res, descripcion_error, codigo_error);
   }
@@ -222,8 +223,8 @@ const confirmarPeticion = async (req, res) => {
     //ciframos la contraseña
     nuevaContraseña=await cifrar(nuevaContraseña);
 
-    const user = await UserModel.findOneAndUpdate({ email, codigoVerficacion: codigo }, {codigoVerficacion:undefined, password: nuevaContraseña});
-    if (!user){
+    const user = await UserModel.findOneAndUpdate({ email}, {password: nuevaContraseña});
+    if (!user || user.codigoVerificacion != codigo){
       codigo_error=400;
       descripcion_error="Código inválido o usuario no encontrado";
       throw err;

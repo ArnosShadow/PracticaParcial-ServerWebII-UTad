@@ -31,6 +31,7 @@ const createItem = async(req, res) =>{
         body.codigoValidacion = codigoAleatorio;
 
         console.log(codigoAleatorio);
+        console.log(body);
         const result =await AuthModel.create(body);
         console.log("Recurso creado: "+result);
 
@@ -42,6 +43,7 @@ const createItem = async(req, res) =>{
                 email: result.email,
                 Verificado: result.estadoValidacion,
                 role: result.role,
+                codigoValidacion:codigoAleatorio,
                 token
             }
         );
@@ -56,9 +58,9 @@ const validateItem = async (req, res) => {
     let codigo_error = 500;
 
     try {
-        const body = matchedData(req);
-        const email = body.email;   
-        const code = body.code;
+        
+        const email = req.body.email;   
+        const code = req.body.code;
 
         if (!email || !code) {
             descripcion_error = "Faltan datos obligatorios";
@@ -85,7 +87,7 @@ const validateItem = async (req, res) => {
             codigo_error = 400;
             throw err;
         }
-        await AuthModel.findOneAndReplace({ email }, {estadoValidacion: "Validado"});
+        await AuthModel.findOneAndUpdate({ email }, {estadoValidacion: "Validado"});
 
         res.status(200).json({ message: 'Usuario valido' });
 
@@ -101,7 +103,6 @@ const loginItem =async (req, res) =>{
     try {
         const email= req.body.email;
         let password = req.body.password;
-
         if((typeof password) != String){
             password=(password).toString();
         }

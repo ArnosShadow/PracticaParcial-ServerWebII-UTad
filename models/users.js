@@ -28,7 +28,7 @@ const UserScheme = new mongoose.Schema(
         codigoValidacion:{
             type:String
         },
-        codigoVerficacion:{
+        codigoVerificacion:{
             type:String
         },
         nombre:{
