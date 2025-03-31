@@ -56,8 +56,9 @@ const validateItem = async (req, res) => {
     let codigo_error = 500;
 
     try {
-        const email = req.body.email;   
-        const code = req.body.code;
+        const body = matchedData(req);
+        const email = body.email;   
+        const code = body.code;
 
         if (!email || !code) {
             descripcion_error = "Faltan datos obligatorios";
